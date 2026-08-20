@@ -19,6 +19,33 @@ export type QueueItem = {
 };
 
 const QUEUE_STORAGE_KEY = "atendimento_ticket_queue";
+const TICKETS_STORAGE_KEY = "atendimento_called_tickets";
+
+// Helper para ler/salvar chamadas locais
+export function getLocalTickets(): Ticket[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(TICKETS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalTicket(ticket: Omit<Ticket, "id" | "called_at">): Ticket {
+  const current = getLocalTickets();
+  const newTicket: Ticket = {
+    ...ticket,
+    id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    called_at: new Date().toISOString(),
+  };
+  const updated = [newTicket, ...current];
+  if (typeof window !== "undefined") {
+    localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("tickets_updated"));
+  }
+  return newTicket;
+}
 
 // Helper para ler fila local de fallback
 export function getLocalQueue(): QueueItem[] {
@@ -37,7 +64,6 @@ export function saveLocalQueue(queue: QueueItem[]) {
   window.dispatchEvent(new Event("queue_updated"));
 }
 
-// Emite uma nova senha no Totem e adiciona à Fila de Espera
 export async function addTicketToQueue(
   ticket_code: string,
   category_name: string,
@@ -54,11 +80,9 @@ export async function addTicketToQueue(
     created_at: new Date().toISOString(),
   };
 
-  // Salvar no localStorage
   const currentQueue = getLocalQueue();
   saveLocalQueue([...currentQueue, newItem]);
 
-  // Tentar salvar no Supabase
   try {
     await supabase.from("ticket_queue").insert({
       id: newItem.id,
@@ -68,7 +92,6 @@ export async function addTicketToQueue(
     });
   } catch {}
 
-  // Broadcast realtime via Supabase Channel
   try {
     const channel = supabase.channel("queue-channel");
     channel.subscribe((status) => {
@@ -85,7 +108,6 @@ export async function addTicketToQueue(
   return newItem;
 }
 
-// Busca a fila de senhas aguardando
 export async function fetchQueue(): Promise<QueueItem[]> {
   let localItems = getLocalQueue().filter((q) => q.status === "waiting");
 
@@ -111,14 +133,12 @@ export async function fetchQueue(): Promise<QueueItem[]> {
     }
   } catch {}
 
-  // Ordenar localmente: prioridades primeiro, depois por data de criação
   return localItems.sort((a, b) => {
     if (a.is_priority !== b.is_priority) return a.is_priority ? -1 : 1;
     return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
   });
 }
 
-// Remover/Remover da Fila ao Chamar
 export async function removeQueueItem(id: string) {
   const current = getLocalQueue();
   const updated = current.map((item) => (item.id === id ? { ...item, status: "called" as const } : item));
@@ -129,15 +149,19 @@ export async function removeQueueItem(id: string) {
   } catch {}
 }
 
-// Chamadas de Senhas já atendidas
 export async function fetchTickets(limit = 10): Promise<Ticket[]> {
-  const { data, error } = await supabase
-    .from("tickets")
-    .select("*")
-    .order("called_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data ?? []) as Ticket[];
+  const local = getLocalTickets();
+  try {
+    const { data, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .order("called_at", { ascending: false })
+      .limit(limit);
+    if (!error && data && data.length > 0) {
+      return (data ?? []) as Ticket[];
+    }
+  } catch {}
+  return local.slice(0, limit);
 }
 
 export async function insertTicket(
@@ -145,10 +169,13 @@ export async function insertTicket(
   counter_number: number,
   attendant_name: string | null
 ) {
-  const { error } = await supabase
-    .from("tickets")
-    .insert({ ticket_code, counter_number, attendant_name });
-  if (error) throw error;
+  saveLocalTicket({ ticket_code, counter_number, attendant_name });
+
+  try {
+    await supabase
+      .from("tickets")
+      .insert({ ticket_code, counter_number, attendant_name });
+  } catch {}
 }
 
 export function subscribeTickets(onChange: () => void) {
@@ -161,12 +188,21 @@ export function subscribeTickets(onChange: () => void) {
     )
     .subscribe();
 
+  const handleStorage = () => onChange();
+  if (typeof window !== "undefined") {
+    window.addEventListener("tickets_updated", handleStorage);
+    window.addEventListener("storage", handleStorage);
+  }
+
   return () => {
     supabase.removeChannel(ch);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("tickets_updated", handleStorage);
+      window.removeEventListener("storage", handleStorage);
+    }
   };
 }
 
-// Inscrição em Tempo Real para Fila de Espera (Totem -> Atendente)
 export function subscribeQueue(onChange: () => void) {
   const ch = supabase
     .channel("queue-realtime")
