@@ -160,12 +160,13 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
         "projetada para coordenar filas de atendimento em estabelecimentos como clínicas, escritórios, repartições "
         "públicas, bancos e guichês de serviço.", styles['Body']))
     story.append(p(
-        "O sistema opera através de <b>três telas</b> sincronizadas simultaneamente em tempo real via WebSockets:", styles['Body']))
-    story.append(p("• <b>Tela Inicial (Seleção de Painel):</b> Página de boas-vindas onde o operador escolhe qual painel abrir.", styles['BulletItem']))
-    story.append(p("• <b>Painel do Atendente:</b> Interface completa de controle onde o operador chama senhas, gerencia vídeos da TV e visualiza histórico.", styles['BulletItem']))
-    story.append(p("• <b>Painel do Solicitante (TV Pública):</b> Tela de exibição pública projetada para TVs/monitores grandes, mostrando a senha chamada com alerta sonoro e visual, além de vídeos em loop.", styles['BulletItem']))
-    story.append(p("• <b>Tela de Avaliação de Atendimento:</b> Interface interativa de pesquisa de satisfação pós-atendimento para coleta de feedback do cliente.", styles['BulletItem']))
-    story.append(p("• <b>Painel Administrativo com Gráficos:</b> Dashboard de gestão com relatórios visuais, gráficos de pico de horário e médias de satisfação.", styles['BulletItem']))
+        "O sistema opera através de <b>cinco telas</b> sincronizadas simultaneamente em tempo real via WebSockets/Supabase:", styles['Body']))
+    story.append(p("• <b>Tela Inicial (Seleção de Painel):</b> Hub central onde o usuário escolhe qual das 5 interfaces deseja acessar.", styles['BulletItem']))
+    story.append(p("• <b>Painel do Atendente:</b> Interface de controle onde o operador chama senhas, escolhe guichê, gerencia vídeos da TV e visualiza histórico.", styles['BulletItem']))
+    story.append(p("• <b>Painel do Solicitante (TV Pública):</b> Exibição pública em TVs, mostrando a senha chamada em destaque, alerta sonoro (beep double) e visual (glow), e vídeos da playlist.", styles['BulletItem']))
+    story.append(p("• <b>Totem de Emissão de Senhas:</b> Autoatendimento touchscreen para clientes selecionarem a categoria (Normal, Prioritário, Exames, Informações) e emitirem o ticket impresso com confirmação sonora.", styles['BulletItem']))
+    story.append(p("• <b>Pesquisa de Avaliação de Atendimento:</b> Interface interativa de satisfação do cliente com escala de 1 a 4 (Ruim, Regular, Bom, Excelente) e comentários opcionais.", styles['BulletItem']))
+    story.append(p("• <b>Painel Administrativo & Dashboard:</b> Painel gerencial com KPIs, taxa de aprovação, distribuição de notas (1 a 4), desempenho por atendente e relatório completo.", styles['BulletItem']))
     story.append(Spacer(1, 6))
     story.append(p(
         "Qualquer ação realizada pelo atendente (chamar senha, trocar vídeo, repetir sinal) é <b>instantaneamente transmitida</b> "
@@ -173,7 +174,7 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(Spacer(1, 4))
     story.append(p(
         "<b>NOTA:</b> O sistema funciona 100% no navegador web — não requer instalação de software. "
-        "Basta abrir a URL no computador do atendente e na TV.", styles['Callout']))
+        "Basta abrir a URL correspondente no computador do atendente, na TV, no totem ou nos tablets de avaliação.", styles['Callout']))
 
     # ═══════════════════════════════════════════════════════════════════
     # 2. TELAS DO SISTEMA
@@ -182,11 +183,14 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
 
     story.append(p("2.1. Tela Inicial — Página de Seleção ( / )", styles['H2']))
     story.append(p(
-        "Ao acessar a URL raiz do sistema, o usuário encontra uma página centralizada com dois cartões grandes:", styles['Body']))
-    story.append(p("• <b>Painel do Atendente</b> — com ícone de monitor. Clicando, abre a interface de controle do guichê.", styles['BulletItem']))
-    story.append(p("• <b>Painel do Solicitante</b> — com ícone de TV. Clicando, abre a tela pública de exibição.", styles['BulletItem']))
+        "Ao acessar a URL raiz do sistema, o usuário encontra um painel moderno com 5 cartões interativos:", styles['Body']))
+    story.append(p("• <b>Painel do Atendente</b> — Acesso ao painel de controle do guichê.", styles['BulletItem']))
+    story.append(p("• <b>Painel do Solicitante (TV)</b> — Exibição pública para transmissão na TV da recepção.", styles['BulletItem']))
+    story.append(p("• <b>Emissão de Senhas (Totem)</b> — Interface de autoatendimento para retirada de senhas por categoria.", styles['BulletItem']))
+    story.append(p("• <b>Avaliação de Atendimento</b> — Formulário pós-atendimento para coleta de feedback (1 a 4).", styles['BulletItem']))
+    story.append(p("• <b>Painel Administrativo</b> — Dashboard gerencial com gráficos, taxas de aprovação e relatórios.", styles['BulletItem']))
     story.append(p(
-        "Os cartões possuem efeito hover com escala suave (zoom de 1.02x) e sombra intensa para facilitar a interação.", styles['Body']))
+        "Os cartões possuem efeito hover com escala suave (zoom de 1.02x), brilhos adaptativos e sombras de destaque.", styles['Body']))
 
     story.append(Spacer(1, 6))
     story.append(p("2.2. Painel do Atendente ( /atendente )", styles['H2']))
@@ -207,20 +211,30 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(p("– <b>Bloco Inferior (HISTÓRICO):</b> Lista as últimas 4 senhas chamadas com número da senha e guichê correspondente.", styles['BulletSub']))
 
     story.append(Spacer(1, 6))
-    story.append(p("2.4. Tela de Avaliação de Atendimento ( /avaliacao )", styles['H2']))
+    story.append(p("2.4. Totem de Emissão de Senhas ( /emissao )", styles['H2']))
     story.append(p(
-        "Interface de pesquisa de satisfação apresentada ao cliente no guichê ou totem interativo após o atendimento:", styles['Body']))
-    story.append(p("• <b>Escala de Avaliação:</b> Seleção por estrelas (1 a 5) ou botões de satisfação (Excelente, Bom, Regular, Insatisfeito).", styles['BulletItem']))
-    story.append(p("• <b>Vínculo com Atendimento:</b> Registra a nota associando automaticamente o código da senha, guichê e nome do atendente.", styles['BulletItem']))
-    story.append(p("• <b>Comentários Opcionais:</b> Campo livre para feedback textual curto do cliente.", styles['BulletItem']))
+        "Interface de autoatendimento touchscreen desenvolvida para a entrada do estabelecimento:", styles['Body']))
+    story.append(p("• <b>Categorias de Fila:</b> Atendimento Normal (N), Atendimento Preferencial (P - Lei 10.048/00), Exames & Resultados (E) e Informações (I).", styles['BulletItem']))
+    story.append(p("• <b>Impressão de Ticket:</b> Modal explicativo simulando o ticket impresso com o código gerado, data/hora e tipo de serviço.", styles['BulletItem']))
+    story.append(p("• <b>Feedback Sonoro:</b> Emite aviso sonoro ao emitir a senha com sucesso.", styles['BulletItem']))
 
     story.append(Spacer(1, 6))
-    story.append(p("2.5. Painel Administrativo e Dashboard de Métricas ( /admin )", styles['H2']))
+    story.append(p("2.5. Tela de Avaliação de Atendimento ( /avaliacao )", styles['H2']))
     story.append(p(
-        "Dashboard gerencial com gráficos e indicadores de desempenho do estabelecimento em tempo real:", styles['Body']))
-    story.append(p("• <b>Gráficos de Atendimento:</b> Volume de senhas chamadas por horário (picos de fluxo) e média de tempo de espera.", styles['BulletItem']))
-    story.append(p("• <b>Gráficos de Avaliação:</b> Distribuição percentual das notas de satisfação obtidas.", styles['BulletItem']))
-    story.append(p("• <b>Relatório de Atendentes:</b> Tabela com total de chamadas e média de avaliação por guichê e atendente.", styles['BulletItem']))
+        "Interface de pesquisa de satisfação pós-atendimento para coleta de opinião do cliente:", styles['Body']))
+    story.append(p("• <b>Escala de Avaliação de 1 a 4:</b> 1 = Ruim (😞), 2 = Regular (😐), 3 = Bom (🙂), 4 = Excelente (😃).", styles['BulletItem']))
+    story.append(p("• <b>Vínculo com Atendimento:</b> Registra a nota permitindo vincular o código da senha, guichê e nome do atendente.", styles['BulletItem']))
+    story.append(p("• <b>Comentários Opcionais:</b> Campo aberto para envio de sugestões ou elogios.", styles['BulletItem']))
+
+    story.append(Spacer(1, 6))
+    story.append(p("2.6. Painel Administrativo e Dashboard de Métricas ( /admin )", styles['H2']))
+    story.append(p(
+        "Dashboard gerencial protegido por autenticação segura de administrador (e-mail e senha):", styles['Body']))
+    story.append(p("• <b>Controle de Acesso Seguro:</b> Tela de autenticação com validação no servidor (Server Function), sem exposição de credenciais no frontend.", styles['BulletItem']))
+    story.append(p("• <b>KPIs Principais:</b> Total de chamadas no dia, média de avaliação (escala 1 a 4), taxa de aprovação (%) e total de feedbacks.", styles['BulletItem']))
+    story.append(p("• <b>Gráficos de Satisfação:</b> Distribuição percentual das notas de 1 a 4 em barras visuais.", styles['BulletItem']))
+    story.append(p("• <b>Relatório por Atendente:</b> Tabela com o número de senhas atendidas e nota média individual.", styles['BulletItem']))
+    story.append(p("• <b>Histórico de Feedbacks:</b> Lista das últimas pesquisas registradas com comentários dos clientes.", styles['BulletItem']))
 
     story.append(PageBreak())
 
