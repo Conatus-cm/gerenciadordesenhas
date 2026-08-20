@@ -164,6 +164,8 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(p("• <b>Tela Inicial (Seleção de Painel):</b> Página de boas-vindas onde o operador escolhe qual painel abrir.", styles['BulletItem']))
     story.append(p("• <b>Painel do Atendente:</b> Interface completa de controle onde o operador chama senhas, gerencia vídeos da TV e visualiza histórico.", styles['BulletItem']))
     story.append(p("• <b>Painel do Solicitante (TV Pública):</b> Tela de exibição pública projetada para TVs/monitores grandes, mostrando a senha chamada com alerta sonoro e visual, além de vídeos em loop.", styles['BulletItem']))
+    story.append(p("• <b>Tela de Avaliação de Atendimento:</b> Interface interativa de pesquisa de satisfação pós-atendimento para coleta de feedback do cliente.", styles['BulletItem']))
+    story.append(p("• <b>Painel Administrativo com Gráficos:</b> Dashboard de gestão com relatórios visuais, gráficos de pico de horário e médias de satisfação.", styles['BulletItem']))
     story.append(Spacer(1, 6))
     story.append(p(
         "Qualquer ação realizada pelo atendente (chamar senha, trocar vídeo, repetir sinal) é <b>instantaneamente transmitida</b> "
@@ -203,6 +205,22 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(p("• <b>Coluna Direita (45% da tela):</b> Dividida em dois blocos:", styles['BulletItem']))
     story.append(p("– <b>Bloco Superior (SENHA ATUAL):</b> Exibe em tamanho gigante (8rem) a senha chamada, o número do guichê e o nome do atendente. Quando uma nova senha é chamada, o bloco pisca com efeito luminoso (Flash Glow) por 3.5 segundos e emite dois beeps sonoros.", styles['BulletSub']))
     story.append(p("– <b>Bloco Inferior (HISTÓRICO):</b> Lista as últimas 4 senhas chamadas com número da senha e guichê correspondente.", styles['BulletSub']))
+
+    story.append(Spacer(1, 6))
+    story.append(p("2.4. Tela de Avaliação de Atendimento ( /avaliacao )", styles['H2']))
+    story.append(p(
+        "Interface de pesquisa de satisfação apresentada ao cliente no guichê ou totem interativo após o atendimento:", styles['Body']))
+    story.append(p("• <b>Escala de Avaliação:</b> Seleção por estrelas (1 a 5) ou botões de satisfação (Excelente, Bom, Regular, Insatisfeito).", styles['BulletItem']))
+    story.append(p("• <b>Vínculo com Atendimento:</b> Registra a nota associando automaticamente o código da senha, guichê e nome do atendente.", styles['BulletItem']))
+    story.append(p("• <b>Comentários Opcionais:</b> Campo livre para feedback textual curto do cliente.", styles['BulletItem']))
+
+    story.append(Spacer(1, 6))
+    story.append(p("2.5. Painel Administrativo e Dashboard de Métricas ( /admin )", styles['H2']))
+    story.append(p(
+        "Dashboard gerencial com gráficos e indicadores de desempenho do estabelecimento em tempo real:", styles['Body']))
+    story.append(p("• <b>Gráficos de Atendimento:</b> Volume de senhas chamadas por horário (picos de fluxo) e média de tempo de espera.", styles['BulletItem']))
+    story.append(p("• <b>Gráficos de Avaliação:</b> Distribuição percentual das notas de satisfação obtidas.", styles['BulletItem']))
+    story.append(p("• <b>Relatório de Atendentes:</b> Tabela com total de chamadas e média de avaliação por guichê e atendente.", styles['BulletItem']))
 
     story.append(PageBreak())
 
