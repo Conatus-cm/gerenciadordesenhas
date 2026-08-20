@@ -548,7 +548,7 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
         [p("VITE_SUPABASE_PUBLISHABLE_KEY", styles['TD']), p("Chave anon/pública do Supabase", styles['TD']), p("sb_publishable_xxx...", styles['TD'])],
         [p("SUPABASE_URL", styles['TD']), p("Mesma URL (para SSR)", styles['TD']), p("https://xxx.supabase.co", styles['TD'])],
         [p("SUPABASE_PUBLISHABLE_KEY", styles['TD']), p("Mesma chave (para SSR)", styles['TD']), p("sb_publishable_xxx...", styles['TD'])],
-        [p("SUPABASE_PROJECT_ID", styles['TD']), p("ID do projeto (referência)", styles['TD']), p("eitwmzpysopzenmeroag", styles['TD'])],
+        [p("SUPABASE_PROJECT_ID", styles['TD']), p("ID do projeto (referência)", styles['TD']), p("seu_project_id", styles['TD'])],
     ]
     story.append(table_standard(env_rows, [175, 190, 175]))
 
