@@ -214,7 +214,7 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(p("2.4. Totem de Emissão de Senhas ( /emissao )", styles['H2']))
     story.append(p(
         "Interface de autoatendimento touchscreen desenvolvida para a entrada do estabelecimento:", styles['Body']))
-    story.append(p("• <b>Categorias de Fila:</b> Atendimento Normal (N), Atendimento Preferencial (P - Lei 10.048/00), Exames & Resultados (E) e Informações (I).", styles['BulletItem']))
+    story.append(p("• <b>Categorias de Fila:</b> Atendimento Normal (N), Atendimento Preferencial (P - Lei 10.048/00) e Atendimento do RH (RH - Recursos Humanos).", styles['BulletItem']))
     story.append(p("• <b>Impressão de Ticket:</b> Modal explicativo simulando o ticket impresso com o código gerado, data/hora e tipo de serviço.", styles['BulletItem']))
     story.append(p("• <b>Feedback Sonoro:</b> Emite aviso sonoro ao emitir a senha com sucesso.", styles['BulletItem']))
 

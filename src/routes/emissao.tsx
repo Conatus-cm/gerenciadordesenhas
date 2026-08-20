@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Ticket as TicketIcon, Sparkles, UserCheck, HeartHandshake, FileText, Info, Printer, CheckCircle, ArrowLeft } from "lucide-react";
+import { Ticket as TicketIcon, Sparkles, UserCheck, HeartHandshake, Briefcase, Printer, CheckCircle, ArrowLeft } from "lucide-react";
 import { insertTicket } from "@/lib/tickets";
 import { toast } from "sonner";
 
@@ -40,22 +40,13 @@ const CATEGORIES: Category[] = [
     badge: "Prioridade Legal",
   },
   {
-    id: "exames",
-    prefix: "E",
-    title: "Exames & Resultados",
-    description: "Retirada de laudos, agendamento de exames e entregas rápidas de documentos.",
-    icon: FileText,
+    id: "rh",
+    prefix: "RH",
+    title: "Atendimento do RH",
+    description: "Atendimento exclusivo para colaboradores, recrutamento, benefícios e demandas do Recursos Humanos.",
+    icon: Briefcase,
     colorClass: "from-purple-600 to-pink-700 hover:from-purple-500 hover:to-pink-600 text-white shadow-purple-900/30",
-    badge: "Rápido",
-  },
-  {
-    id: "informacoes",
-    prefix: "I",
-    title: "Informações & Orientação",
-    description: "Tire dúvidas, obtenha guias e receba auxílio inicial sobre o seu atendimento.",
-    icon: Info,
-    colorClass: "from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 text-white shadow-amber-900/30",
-    badge: "Suporte",
+    badge: "RH",
   },
 ];
 
@@ -74,10 +65,7 @@ function EmissaoPage() {
       const currentSeq = Number(localStorage.getItem(storageKey)) || 101;
       const ticketCode = `${category.prefix}-${currentSeq}`;
 
-      // Salva no banco de tickets
       await insertTicket(ticketCode, 1, "Totem Autoatendimento");
-
-      // Incrementar sequência local
       localStorage.setItem(storageKey, String(currentSeq + 1));
 
       const now = new Date().toLocaleTimeString("pt-BR", {
@@ -92,14 +80,13 @@ function EmissaoPage() {
         timestamp: now,
       });
 
-      // Efeito sonoro de emissão
       if (typeof window !== "undefined" && "AudioContext" in window) {
         try {
           const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = "sine";
-          osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
           gain.gain.setValueAtTime(0.15, ctx.currentTime);
           osc.connect(gain);
           gain.connect(ctx.destination);
@@ -118,9 +105,8 @@ function EmissaoPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-4 md:p-8 relative overflow-hidden">
-      {/* Background glow effects */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <header className="flex items-center justify-between max-w-6xl mx-auto w-full mb-8 z-10">
@@ -154,8 +140,8 @@ function EmissaoPage() {
           </h2>
         </div>
 
-        {/* Category Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto w-full">
+        {/* Category Grid - 3 Categorias */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -163,7 +149,7 @@ function EmissaoPage() {
                 key={cat.id}
                 disabled={loading}
                 onClick={() => issueTicket(cat)}
-                className={`group relative flex flex-col justify-between p-8 rounded-3xl bg-gradient-to-br ${cat.colorClass} shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-white/10 text-left cursor-pointer`}
+                className={`group relative flex flex-col justify-between p-8 rounded-3xl bg-gradient-to-br ${cat.colorClass} shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-white/10 text-left cursor-pointer min-h-[280px]`}
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
@@ -174,8 +160,8 @@ function EmissaoPage() {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-2xl md:text-3xl font-extrabold mb-2">{cat.title}</h3>
-                  <p className="text-white/80 text-sm md:text-base leading-relaxed">{cat.description}</p>
+                  <h3 className="text-2xl font-extrabold mb-2">{cat.title}</h3>
+                  <p className="text-white/80 text-sm leading-relaxed">{cat.description}</p>
                 </div>
               </button>
             );
@@ -194,7 +180,6 @@ function EmissaoPage() {
             <h3 className="text-xl font-bold text-slate-200 mb-1">Sua senha foi emitida!</h3>
             <p className="text-xs text-slate-400 mb-6">{issuedTicket.category.title}</p>
 
-            {/* Simulação do Ticket Impresso */}
             <div className="bg-white text-slate-900 rounded-2xl p-6 shadow-inner border border-slate-200 mb-6 font-mono text-center relative">
               <div className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">
                 SISTEMA DE ATENDIMENTO
