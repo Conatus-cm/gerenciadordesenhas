@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Ticket as TicketIcon, Sparkles, UserCheck, HeartHandshake, Briefcase, Printer, CheckCircle, ArrowLeft } from "lucide-react";
-import { insertTicket } from "@/lib/tickets";
+import { addTicketToQueue } from "@/lib/tickets";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/emissao")({
@@ -65,7 +65,14 @@ function EmissaoPage() {
       const currentSeq = Number(localStorage.getItem(storageKey)) || 101;
       const ticketCode = `${category.prefix}-${currentSeq}`;
 
-      await insertTicket(ticketCode, 1, "Totem Autoatendimento");
+      // Adiciona à Fila de Espera em tempo real
+      await addTicketToQueue(
+        ticketCode,
+        category.title,
+        category.prefix,
+        category.id === "prioritario"
+      );
+
       localStorage.setItem(storageKey, String(currentSeq + 1));
 
       const now = new Date().toLocaleTimeString("pt-BR", {

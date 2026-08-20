@@ -195,10 +195,11 @@ def generate_pdf(filename="Documentacao_Tecnica_Sistema_Atendimento.pdf"):
     story.append(Spacer(1, 6))
     story.append(p("2.2. Painel do Atendente ( /atendente )", styles['H2']))
     story.append(p(
-        "É a tela principal de operação. Composta por <b>quatro cartões empilhados</b> verticalmente:", styles['Body']))
-    story.append(p("• <b>Cartão Principal de Controle</b> — Contém: número do guichê (editável), nome do atendente (editável), próxima senha (editável), botão CHAMAR PRÓXIMA SENHA e botão REPETIR SENHA ATUAL.", styles['BulletItem']))
-    story.append(p("• <b>Cartão de Senha Manual</b> — Campo de digitação livre para chamar qualquer código personalizado (ex: P-01, VIP-3) sem alterar a sequência automática.", styles['BulletItem']))
-    story.append(p("• <b>Cartão de Fila da TV</b> — Gerenciador completo de vídeos/mídias que são exibidos na tela do solicitante. Permite adicionar links do YouTube ou MP4, ver a lista, remover itens, repetir e reiniciar a fila.", styles['BulletItem']))
+        "É a tela principal de operação do guichê. Composta por <b>cinco módulos principais</b>:", styles['Body']))
+    story.append(p("• <b>Gerenciador de Fila do Totem (Senhas Solicitadas):</b> Exibe em tempo real a lista de senhas emitidas no Totem (`/emissao`) organizadas por ordem de prioridade (Atendimento Preferencial primeiro) e horário de emissão, com botões diretos de chamada e descarte.", styles['BulletItem']))
+    story.append(p("• <b>Cartão Principal de Controle</b> — Número do guichê (editável), nome do atendente (editável), botão CHAMAR PRÓXIMA SENHA DA FILA e botão REPETIR SENHA ATUAL.", styles['BulletItem']))
+    story.append(p("• <b>Cartão de Senha Personalizada / Manual</b> — Digitação livre para chamar senhas customizadas (ex: VIP-01).", styles['BulletItem']))
+    story.append(p("• <b>Cartão de Fila da TV</b> — Gerenciador completo de vídeos (YouTube ou MP4) exibidos na tela do solicitante.", styles['BulletItem']))
     story.append(p("• <b>Cartão de Histórico</b> — Lista das últimas 10 senhas chamadas com código, guichê, atendente e horário.", styles['BulletItem']))
 
     story.append(Spacer(1, 6))
