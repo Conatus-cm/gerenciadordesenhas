@@ -11,7 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { addTicketToQueue } from "@/lib/tickets";
+import { insertTicket } from "@/lib/tickets";
 
 export const Route = createFileRoute("/emissao")({
   ssr: false,
@@ -37,7 +37,7 @@ type Category = {
 const CATEGORIES: Category[] = [
   {
     id: "normal",
-    prefix: "",
+    prefix: "N",
     title: "Atendimento Normal",
     description: "Fila convencional para atendimento geral e solicitações de serviços.",
     icon: UserCheck,
@@ -100,13 +100,18 @@ export function EmissaoTotemPage() {
   const handleEmit = async (cat: Category) => {
     setLoading(true);
     try {
-      const storageKey = "next_seq";
-      const currentSeq = Number(localStorage.getItem(storageKey)) || 1;
-      const formattedNum = String(currentSeq).padStart(3, "0");
-      const code = cat.prefix ? `${cat.prefix} ${formattedNum}` : formattedNum;
+      const storageKey = `seq_${cat.prefix}`;
+      const currentSeq = Number(localStorage.getItem(storageKey)) || 101;
+      const code = `${cat.prefix}-${currentSeq}`;
 
-      const nextNum = currentSeq >= 999 ? 1 : currentSeq + 1;
-      localStorage.setItem(storageKey, String(nextNum));
+      // Salva no Supabase e aciona o painel em tempo real
+      try {
+        await insertTicket(code, 1, null);
+      } catch (err) {
+        console.warn("Falha ao sincronizar com banco de dados, emitindo localmente:", err);
+      }
+
+      localStorage.setItem(storageKey, String(currentSeq + 1));
 
       const timeStr = new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -119,14 +124,6 @@ export function EmissaoTotemPage() {
         category: cat,
         timestamp: timeStr,
       });
-
-      // Adiciona à fila de espera em tempo real para ser chamada no painel do atendente
-      await addTicketToQueue(
-        code,
-        cat.title,
-        cat.prefix,
-        cat.id === "prioritario"
-      );
 
       playBeep();
       toast.success(`Senha ${code} emitida com sucesso!`);

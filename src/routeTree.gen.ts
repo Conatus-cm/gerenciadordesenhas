@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TotemRouteImport } from './routes/totem'
 import { Route as SolicitanteRouteImport } from './routes/solicitante'
 import { Route as EmissaoRouteImport } from './routes/emissao'
 import { Route as AtendenteRouteImport } from './routes/atendente'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TotemRoute = TotemRouteImport.update({
+  id: '/totem',
+  path: '/totem',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SolicitanteRoute = SolicitanteRouteImport.update({
   id: '/solicitante',
   path: '/solicitante',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/atendente': typeof AtendenteRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
+  '/totem': typeof TotemRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/atendente': typeof AtendenteRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
+  '/totem': typeof TotemRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/atendente': typeof AtendenteRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
+  '/totem': typeof TotemRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/atendente' | '/emissao' | '/solicitante'
+  fullPaths: '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/atendente' | '/emissao' | '/solicitante'
-  id: '__root__' | '/' | '/atendente' | '/emissao' | '/solicitante'
+  to: '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
+  id: '__root__' | '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +76,18 @@ export interface RootRouteChildren {
   AtendenteRoute: typeof AtendenteRoute
   EmissaoRoute: typeof EmissaoRoute
   SolicitanteRoute: typeof SolicitanteRoute
+  TotemRoute: typeof TotemRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/totem': {
+      id: '/totem'
+      path: '/totem'
+      fullPath: '/totem'
+      preLoaderRoute: typeof TotemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/solicitante': {
       id: '/solicitante'
       path: '/solicitante'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtendenteRoute: AtendenteRoute,
   EmissaoRoute: EmissaoRoute,
   SolicitanteRoute: SolicitanteRoute,
+  TotemRoute: TotemRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

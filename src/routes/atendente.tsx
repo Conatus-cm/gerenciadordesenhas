@@ -13,20 +13,8 @@ import {
   Repeat,
   CircleCheckBig,
   X,
-  Sparkles,
-  UserCheck,
-  HeartHandshake,
 } from "lucide-react";
-import {
-  fetchTickets,
-  insertTicket,
-  subscribeTickets,
-  fetchQueue,
-  removeQueueItem,
-  subscribeQueue,
-  type Ticket,
-  type QueueItem,
-} from "@/lib/tickets";
+import { fetchTickets, insertTicket, subscribeTickets, type Ticket } from "@/lib/tickets";
 import {
   fetchPlaylist,
   addPlaylistItem,
@@ -87,12 +75,10 @@ function AtendentePage() {
     return Number(localStorage.getItem("next_seq")) || 1;
   });
 
-  const [activeTab, setActiveTab] = useState<"totem" | "manual">("totem");
   const [editingCounter, setEditingCounter] = useState(false);
   const [editingNext, setEditingNext] = useState(false);
   const [nextDraft, setNextDraft] = useState<string>("");
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [queue, setQueue] = useState<QueueItem[]>([]);
   const [manual, setManual] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTicket, setActiveTicket] = useState<string | null>(null);
@@ -107,21 +93,17 @@ function AtendentePage() {
   const reloadMedia = () => fetchPlaylist().then(setPlaylist).catch(() => {});
   const reloadTickets = () =>
     fetchTickets(20).then(setTickets).catch((e) => toast.error(e.message));
-  const reloadQueue = () => fetchQueue().then(setQueue).catch(() => {});
 
   const last = tickets[0] ?? null;
   const lastCode = last?.ticket_code ?? null;
 
   useEffect(() => {
     reloadTickets();
-    reloadQueue();
     reloadMedia();
     const unsubT = subscribeTickets(reloadTickets);
-    const unsubQ = subscribeQueue(reloadQueue);
     const unsubM = subscribePlaylist(reloadMedia);
     return () => {
       unsubT();
-      unsubQ();
       unsubM();
     };
   }, []);
@@ -149,47 +131,7 @@ function AtendentePage() {
     }
   };
 
-  const callQueueItem = async (item: QueueItem) => {
-    await callTicket(item.ticket_code);
-    await removeQueueItem(item.id);
-    reloadQueue();
-  };
-
-  const callNextAny = async () => {
-    if (queue.length > 0) {
-      await callQueueItem(queue[0]);
-    } else {
-      const code = String(nextSeq).padStart(3, "0");
-      await callTicket(code);
-      setNextSeq((n) => clampSeq(n + 1));
-    }
-  };
-
-  const callNextNormal = async () => {
-    const normalItem = queue.find((q) => !q.is_priority);
-    if (normalItem) {
-      await callQueueItem(normalItem);
-    } else {
-      const code = String(nextSeq).padStart(3, "0");
-      await callTicket(code);
-      setNextSeq((n) => clampSeq(n + 1));
-    }
-  };
-
-  const callNextPriority = async () => {
-    const priorityItem = queue.find((q) => q.is_priority);
-    if (priorityItem) {
-      await callQueueItem(priorityItem);
-    } else if (queue.length > 0) {
-      await callQueueItem(queue[0]);
-    } else {
-      const code = `P ${String(nextSeq).padStart(3, "0")}`;
-      await callTicket(code);
-      setNextSeq((n) => clampSeq(n + 1));
-    }
-  };
-
-  const callNextSeq = async () => {
+  const callNext = async () => {
     const code = String(nextSeq).padStart(3, "0");
     await callTicket(code);
     setNextSeq((n) => clampSeq(n + 1));
@@ -284,9 +226,6 @@ function AtendentePage() {
     }
   };
 
-  const totalAguardando = queue.length;
-  const totalPreferenciais = queue.filter((q) => q.is_priority).length;
-
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
       <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 tracking-wide text-center">
@@ -297,33 +236,6 @@ function AtendentePage() {
           </span>
         )}
       </h1>
-
-      {/* Tabs Selector: Fila do Totem vs Senha Manual/Sequencial */}
-      <div className="bg-card/80 border border-border p-1.5 rounded-2xl flex max-w-md w-full mb-5 shadow-lg">
-        <button
-          onClick={() => setActiveTab("totem")}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
-            activeTab === "totem"
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          Fila do Totem ({queue.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("manual")}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
-            activeTab === "manual"
-              ? "bg-primary text-primary-foreground shadow-md"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <PhoneCall className="w-4 h-4" />
-          Sequencial / Manual
-        </button>
-      </div>
 
       <div className="w-full max-w-md space-y-5">
         {/* Main Card */}
@@ -348,7 +260,7 @@ function AtendentePage() {
               )}
               <button
                 onClick={() => setEditingCounter((v) => !v)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <Pencil className="w-4 h-4" />
               </button>
@@ -365,6 +277,51 @@ function AtendentePage() {
               placeholder="Ex: Carlos"
               className="w-full px-2 py-1 rounded border border-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
+          </div>
+
+          {/* Próxima Senha */}
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-secondary/40">
+            <span className="font-semibold tracking-wider text-xs text-muted-foreground">
+              PRÓXIMA SENHA:
+            </span>
+            <div className="flex items-center gap-2">
+              {editingNext ? (
+                <>
+                  <input
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={nextDraft}
+                    autoFocus
+                    onChange={(e) => setNextDraft(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveNextDraft()}
+                    className="w-20 px-2 py-1 rounded border border-input text-center font-bold"
+                  />
+                  <button
+                    onClick={saveNextDraft}
+                    className="text-primary hover:opacity-80 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="font-bold text-lg">
+                    {String(nextSeq).padStart(3, "0")}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setNextDraft(String(nextSeq));
+                      setEditingNext(true);
+                    }}
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Editar próxima senha"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Estado: EM ATENDIMENTO */}
@@ -393,152 +350,24 @@ function AtendentePage() {
                 REPETIR SENHA ({activeTicket})
               </button>
             </div>
-          ) : activeTab === "totem" ? (
-            /* Tab: Fila do Totem */
-            <div className="space-y-4 pt-1">
-              {/* Contadores da Fila */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-950/40 border border-blue-800/40 rounded-xl p-3 text-center">
-                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">
-                    AGUARDANDO
-                  </span>
-                  <span className="text-3xl font-black text-blue-300">
-                    {totalAguardando}
-                  </span>
-                </div>
-                <div className="bg-emerald-950/40 border border-emerald-800/40 rounded-xl p-3 text-center">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
-                    PREFERENCIAIS
-                  </span>
-                  <span className="text-3xl font-black text-emerald-300">
-                    {totalPreferenciais}
-                  </span>
-                </div>
-              </div>
-
-              {/* Botões de Ação do Totem */}
-              <div className="space-y-2.5">
-                <button
-                  onClick={callNextAny}
-                  disabled={loading}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer disabled:opacity-50"
-                >
-                  <PhoneCall className="w-5 h-5" />
-                  <span>CHAMAR PRÓXIMA DA FILA</span>
-                </button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={callNextNormal}
-                    disabled={loading}
-                    className="py-3 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-bold rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <UserCheck className="w-4 h-4 text-blue-400" />
-                    Chamar Normal
-                  </button>
-
-                  <button
-                    onClick={callNextPriority}
-                    disabled={loading}
-                    className="py-3 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-bold rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <HeartHandshake className="w-4 h-4 text-emerald-400" />
-                    Chamar Preferencial
-                  </button>
-                </div>
-              </div>
-
-              {/* Lista detalhada das senhas na fila de espera */}
-              {queue.length > 0 && (
-                <div className="space-y-2 pt-2 border-t border-border/60">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Senhas aguardando ({queue.length}):
-                  </p>
-                  <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                    {queue.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border ${
-                          item.is_priority
-                            ? "bg-emerald-950/30 border-emerald-800/40 text-emerald-300"
-                            : "bg-secondary/40 border-border text-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-base">
-                            {item.ticket_code}
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/10 uppercase font-semibold">
-                            {item.category_name}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => callQueueItem(item)}
-                          disabled={loading}
-                          className="px-3 py-1 bg-primary text-primary-foreground font-bold rounded-lg text-xs hover:opacity-90 transition cursor-pointer"
-                        >
-                          Chamar
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           ) : (
-            /* Tab: Sequencial / Manual */
-            <div className="space-y-4 pt-1">
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-secondary/40">
-                <span className="font-semibold tracking-wider text-xs text-muted-foreground">
-                  PRÓXIMA SENHA:
-                </span>
-                <div className="flex items-center gap-2">
-                  {editingNext ? (
-                    <>
-                      <input
-                        type="number"
-                        min={1}
-                        max={999}
-                        value={nextDraft}
-                        autoFocus
-                        onChange={(e) => setNextDraft(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && saveNextDraft()}
-                        className="w-20 px-2 py-1 rounded border border-input text-center font-bold"
-                      />
-                      <button
-                        onClick={saveNextDraft}
-                        className="text-primary hover:opacity-80"
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-bold text-lg">
-                        {String(nextSeq).padStart(3, "0")}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setNextDraft(String(nextSeq));
-                          setEditingNext(true);
-                        }}
-                        className="text-muted-foreground hover:text-foreground"
-                        title="Editar próxima senha"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
+            <div className="space-y-3 pt-1">
               <button
-                onClick={callNextSeq}
+                onClick={callNext}
                 disabled={loading}
                 className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl hover:opacity-90 transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <PhoneCall className="w-5 h-5" />
-                CHAMAR SEQUENCIAL ({String(nextSeq).padStart(3, "0")})
+                CHAMAR PRÓXIMA SENHA ({String(nextSeq).padStart(3, "0")})
+              </button>
+
+              <button
+                onClick={() => lastCode && callTicket(lastCode)}
+                disabled={loading || !lastCode}
+                className="w-full bg-primary/90 text-primary-foreground font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4" />
+                REPETIR SENHA ATUAL ({lastCode ?? "—"})
               </button>
             </div>
           )}
@@ -553,13 +382,13 @@ function AtendentePage() {
         <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-2xl space-y-3">
           <p className="text-center font-semibold tracking-wider text-sm">SENHA MANUAL</p>
           <p className="text-center text-xs text-muted-foreground -mt-1">
-            Chama um número específico diretamente
+            Não altera a sequência das próximas senhas
           </p>
           <input
             value={manual}
             onChange={(e) => setManual(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && callManual()}
-            placeholder="Ex: 80 ou P 012"
+            placeholder="Ex: 80 ou P-101"
             className="w-full px-3 py-2 rounded-lg border border-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
