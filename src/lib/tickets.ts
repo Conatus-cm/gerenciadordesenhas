@@ -12,6 +12,7 @@ export async function fetchTickets(limit = 10): Promise<Ticket[]> {
   const { data, error } = await supabase
     .from("tickets")
     .select("*")
+    .neq("ticket_code", "EXCLUIDO")
     .order("called_at", { ascending: false })
     .limit(limit);
   if (error) throw error;

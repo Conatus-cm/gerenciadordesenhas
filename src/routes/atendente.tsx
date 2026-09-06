@@ -53,8 +53,8 @@ function AtendentePage() {
     return localStorage.getItem("attendant_name") || "";
   });
   const [nextSeq, setNextSeq] = useState<number>(() => {
-    if (typeof window === "undefined") return 101;
-    return Number(localStorage.getItem("next_seq")) || 101;
+    if (typeof window === "undefined") return 1;
+    return Number(localStorage.getItem("next_seq")) || 1;
   });
   const [editingCounter, setEditingCounter] = useState(false);
   const [editingNext, setEditingNext] = useState(false);
@@ -131,7 +131,7 @@ function AtendentePage() {
   };
 
   const callNext = async () => {
-    const code = String(nextSeq);
+    const code = String(nextSeq).padStart(3, "0");
     await callTicket(code);
     setNextSeq((n) => clampSeq(n + 1));
   };
@@ -250,7 +250,7 @@ function AtendentePage() {
                 </>
               ) : (
                 <>
-                  <span className="font-bold text-lg">{nextSeq}</span>
+                  <span className="font-bold text-lg">{String(nextSeq).padStart(3, "0")}</span>
                   <button
                     onClick={() => { setNextDraft(String(nextSeq)); setEditingNext(true); }}
                     className="text-muted-foreground hover:text-foreground"
@@ -294,7 +294,7 @@ function AtendentePage() {
                 className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl hover:opacity-90 transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <PhoneCall className="w-5 h-5" />
-                CHAMAR PRÓXIMA SENHA ({nextSeq})
+                CHAMAR PRÓXIMA SENHA ({String(nextSeq).padStart(3, "0")})
               </button>
 
               <button

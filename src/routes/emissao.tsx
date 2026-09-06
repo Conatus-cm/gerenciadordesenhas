@@ -11,7 +11,6 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { insertTicket } from "@/lib/tickets";
 
 export const Route = createFileRoute("/emissao")({
   ssr: false,
@@ -37,7 +36,7 @@ type Category = {
 const CATEGORIES: Category[] = [
   {
     id: "normal",
-    prefix: "N",
+    prefix: "",
     title: "Atendimento Normal",
     description: "Fila convencional para atendimento geral e solicitações de serviços.",
     icon: UserCheck,
@@ -100,18 +99,13 @@ function EmissaoTotemPage() {
   const handleEmit = async (cat: Category) => {
     setLoading(true);
     try {
-      const storageKey = `seq_${cat.prefix}`;
-      const currentSeq = Number(localStorage.getItem(storageKey)) || 101;
-      const code = `${cat.prefix}-${currentSeq}`;
+      const storageKey = "next_seq";
+      const currentSeq = Number(localStorage.getItem(storageKey)) || 1;
+      const formattedNum = String(currentSeq).padStart(3, "0");
+      const code = cat.prefix ? `${cat.prefix} ${formattedNum}` : formattedNum;
 
-      // Salva no Supabase e atualiza sequence local
-      try {
-        await insertTicket(code, 1, null);
-      } catch (err) {
-        console.warn("Falha ao sincronizar com banco de dados, emitindo localmente:", err);
-      }
-
-      localStorage.setItem(storageKey, String(currentSeq + 1));
+      const nextNum = currentSeq >= 999 ? 1 : currentSeq + 1;
+      localStorage.setItem(storageKey, String(nextNum));
 
       const timeStr = new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
