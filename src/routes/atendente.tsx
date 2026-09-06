@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Pencil, PhoneCall, RotateCcw, History, Check, Tv, Trash2, RefreshCcw, CheckCircle2, Repeat, CircleCheckBig } from "lucide-react";
+import { Pencil, PhoneCall, RotateCcw, History, Check, Tv, Trash2, RefreshCcw, CheckCircle2, Repeat, CircleCheckBig, X, Tag } from "lucide-react";
 import { fetchTickets, insertTicket, subscribeTickets, type Ticket } from "@/lib/tickets";
 import {
   fetchPlaylist,
@@ -31,6 +31,18 @@ function clampSeq(n: number) {
   return Math.floor(n);
 }
 
+const TIPOS_ATENDIMENTO = [
+  { id: "atestado", label: "ATESTADO", icon: "📄" },
+  { id: "protocolos", label: "PROTOCOLOS", icon: "📁" },
+  { id: "reembolso_escolar", label: "REEMBOLSO ESCOLAR", icon: "🎒" },
+  { id: "cartao_cracha", label: "CARTÃO / CRACHÁ", icon: "🪪" },
+  { id: "leva_atestado", label: "LEVA ATESTADO", icon: "📨" },
+  { id: "vaga_creche", label: "VAGA DE CRECHE", icon: "👶" },
+  { id: "papeis_estagio", label: "PAPÉIS DE ESTÁGIO", icon: "📝" },
+  { id: "outros", label: "OUTROS", icon: "💼" },
+  { id: "nao_informado", label: "Não informado", icon: "⚪" },
+];
+
 function AtendentePage() {
   const [counter, setCounter] = useState<number>(() => {
     if (typeof window === "undefined") return 1;
@@ -51,6 +63,8 @@ function AtendentePage() {
   const [manual, setManual] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTicket, setActiveTicket] = useState<string | null>(null);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [selectedTipo, setSelectedTipo] = useState<string>("nao_informado");
 
   // Playlist da TV
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
@@ -89,9 +103,31 @@ function AtendentePage() {
     }
   };
 
-  const finishTicket = () => {
-    toast.success(`Atendimento da senha ${activeTicket} finalizado`);
+  const handleOpenFinalizeModal = () => {
+    setSelectedTipo("nao_informado");
+    setShowFinalizeModal(true);
+  };
+
+  const confirmFinishTicket = (tipoLabel?: string) => {
+    const tipo = tipoLabel || TIPOS_ATENDIMENTO.find((t) => t.id === selectedTipo)?.label || "Não informado";
+    
+    // Salva histórico de atendimento concluído no localStorage
+    try {
+      const historyKey = "finalized_attendances";
+      const existing = JSON.parse(localStorage.getItem(historyKey) || "[]");
+      const record = {
+        ticket_code: activeTicket,
+        counter_number: counter,
+        attendant_name: attendant.trim() || null,
+        service_type: tipo,
+        finished_at: new Date().toISOString(),
+      };
+      localStorage.setItem(historyKey, JSON.stringify([record, ...existing].slice(0, 100)));
+    } catch {}
+
+    toast.success(`Senha ${activeTicket} finalizada com sucesso (${tipo})`);
     setActiveTicket(null);
+    setShowFinalizeModal(false);
   };
 
   const callNext = async () => {
@@ -235,7 +271,7 @@ function AtendentePage() {
                 <p className="text-xs text-muted-foreground">Guichê {counter}</p>
               </div>
               <button
-                onClick={finishTicket}
+                onClick={handleOpenFinalizeModal}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
               >
                 <CircleCheckBig className="w-5 h-5" />
@@ -392,6 +428,57 @@ function AtendentePage() {
           )}
         </div>
       </div>
+
+      {/* Modal: Seleção do Tipo de Atendimento */}
+      {showFinalizeModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-lg rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">Finalizar Atendimento</p>
+                <h3 className="text-2xl font-black">Senha: <span className="text-emerald-500">{activeTicket}</span></h3>
+              </div>
+              <button
+                onClick={() => setShowFinalizeModal(false)}
+                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              Selecione o <strong>tipo de atendimento</strong> realizado para concluir:
+            </p>
+
+            {/* Grid dos Tipos de Atendimento */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[55vh] overflow-y-auto pr-1">
+              {TIPOS_ATENDIMENTO.map((tipo) => (
+                <button
+                  key={tipo.id}
+                  onClick={() => confirmFinishTicket(tipo.label)}
+                  className="flex items-center gap-3 p-3.5 rounded-2xl border border-border bg-secondary/40 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all text-left group font-medium cursor-pointer"
+                >
+                  <span className="text-xl">{tipo.icon}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider group-hover:translate-x-0.5 transition-transform">
+                    {tipo.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Rodapé com botão de cancelar */}
+            <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <button
+                onClick={() => setShowFinalizeModal(false)}
+                className="px-5 py-2.5 rounded-xl border border-border text-sm font-semibold hover:bg-muted transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
