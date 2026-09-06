@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TotemRouteImport } from './routes/totem'
 import { Route as SolicitanteRouteImport } from './routes/solicitante'
 import { Route as EmissaoRouteImport } from './routes/emissao'
+import { Route as AvaliacaoRouteImport } from './routes/avaliacao'
 import { Route as AtendenteRouteImport } from './routes/atendente'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TotemRoute = TotemRouteImport.update({
@@ -30,9 +32,19 @@ const EmissaoRoute = EmissaoRouteImport.update({
   path: '/emissao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AvaliacaoRoute = AvaliacaoRouteImport.update({
+  id: '/avaliacao',
+  path: '/avaliacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtendenteRoute = AtendenteRouteImport.update({
   id: '/atendente',
   path: '/atendente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +55,18 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/atendente': typeof AtendenteRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
   '/totem': typeof TotemRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/atendente': typeof AtendenteRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
   '/totem': typeof TotemRoute
@@ -58,22 +74,48 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/atendente': typeof AtendenteRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/emissao': typeof EmissaoRoute
   '/solicitante': typeof SolicitanteRoute
   '/totem': typeof TotemRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/atendente'
+    | '/avaliacao'
+    | '/emissao'
+    | '/solicitante'
+    | '/totem'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
-  id: '__root__' | '/' | '/atendente' | '/emissao' | '/solicitante' | '/totem'
+  to:
+    | '/'
+    | '/admin'
+    | '/atendente'
+    | '/avaliacao'
+    | '/emissao'
+    | '/solicitante'
+    | '/totem'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/atendente'
+    | '/avaliacao'
+    | '/emissao'
+    | '/solicitante'
+    | '/totem'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AtendenteRoute: typeof AtendenteRoute
+  AvaliacaoRoute: typeof AvaliacaoRoute
   EmissaoRoute: typeof EmissaoRoute
   SolicitanteRoute: typeof SolicitanteRoute
   TotemRoute: typeof TotemRoute
@@ -102,11 +144,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmissaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/avaliacao': {
+      id: '/avaliacao'
+      path: '/avaliacao'
+      fullPath: '/avaliacao'
+      preLoaderRoute: typeof AvaliacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atendente': {
       id: '/atendente'
       path: '/atendente'
       fullPath: '/atendente'
       preLoaderRoute: typeof AtendenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,7 +177,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AtendenteRoute: AtendenteRoute,
+  AvaliacaoRoute: AvaliacaoRoute,
   EmissaoRoute: EmissaoRoute,
   SolicitanteRoute: SolicitanteRoute,
   TotemRoute: TotemRoute,
