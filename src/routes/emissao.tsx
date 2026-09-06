@@ -11,7 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { insertTicket } from "@/lib/tickets";
+import { addTicketToQueue } from "@/lib/tickets";
 
 export const Route = createFileRoute("/emissao")({
   ssr: false,
@@ -93,7 +93,7 @@ function playBeep() {
   } catch {}
 }
 
-function EmissaoTotemPage() {
+export function EmissaoTotemPage() {
   const [emitted, setEmitted] = useState<EmittedTicket | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -120,8 +120,13 @@ function EmissaoTotemPage() {
         timestamp: timeStr,
       });
 
-      // Registra a senha no banco para aparecer no painel do atendente
-      await insertTicket(code, 0, null);
+      // Adiciona à fila de espera em tempo real para ser chamada no painel do atendente
+      await addTicketToQueue(
+        code,
+        cat.title,
+        cat.prefix,
+        cat.id === "prioritario"
+      );
 
       playBeep();
       toast.success(`Senha ${code} emitida com sucesso!`);
