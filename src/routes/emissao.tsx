@@ -11,7 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { insertTicket } from "@/lib/tickets";
+import { addTicketToQueue, insertTicket } from "@/lib/tickets";
 
 export const Route = createFileRoute("/emissao")({
   ssr: false,
@@ -104,12 +104,19 @@ export function EmissaoTotemPage() {
       const currentSeq = Number(localStorage.getItem(storageKey)) || 101;
       const code = `${cat.prefix}-${currentSeq}`;
 
-      // Salva no Supabase e aciona o painel em tempo real
-      try {
-        await insertTicket(code, 1, null);
-      } catch (err) {
-        console.warn("Falha ao sincronizar com banco de dados, emitindo localmente:", err);
-      }
+      // Salva na fila do totem (ticket_queue) e em tickets com o departamento correto (SEMEC Recepção)
+      const deptId = "797947a3-6ad6-4c0a-8f27-fe72f80d38d2";
+
+      await Promise.allSettled([
+        addTicketToQueue(
+          code,
+          cat.title,
+          cat.prefix,
+          cat.id === "prioritario",
+          deptId
+        ),
+        insertTicket(code, 1, null, deptId),
+      ]);
 
       localStorage.setItem(storageKey, String(currentSeq + 1));
 
