@@ -11,6 +11,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { insertTicket } from "@/lib/tickets";
 
 export const Route = createFileRoute("/emissao")({
   ssr: false,
@@ -118,6 +119,9 @@ function EmissaoTotemPage() {
         category: cat,
         timestamp: timeStr,
       });
+
+      // Registra a senha no banco para aparecer no painel do atendente
+      await insertTicket(code, 0, null);
 
       playBeep();
       toast.success(`Senha ${code} emitida com sucesso!`);
