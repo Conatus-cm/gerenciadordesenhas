@@ -1,0 +1,1 @@
+ALTER TABLE public.tickets ADD COLUMN attendant_name TEXT;

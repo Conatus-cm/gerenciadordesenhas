@@ -1,0 +1,67 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 1rem;
+  --background: oklch(0.22 0.06 255);
+  --foreground: oklch(0.98 0.01 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.08 255);
+  --primary: oklch(0.32 0.12 258);
+  --primary-foreground: oklch(0.98 0.01 250);
+  --secondary: oklch(0.95 0.02 255);
+  --secondary-foreground: oklch(0.25 0.08 255);
+  --muted: oklch(0.95 0.02 255);
+  --muted-foreground: oklch(0.5 0.04 257);
+  --accent: oklch(0.45 0.18 258);
+  --accent-foreground: oklch(0.98 0.01 250);
+  --border: oklch(0.9 0.02 255);
+  --input: oklch(0.9 0.02 255);
+  --ring: oklch(0.45 0.18 258);
+  --gradient-bg: linear-gradient(135deg, oklch(0.18 0.07 260) 0%, oklch(0.30 0.12 255) 50%, oklch(0.22 0.09 258) 100%);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body, #root { height: 100%; }
+  body {
+    background: var(--gradient-bg);
+    background-attachment: fixed;
+    color: var(--color-foreground);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+@utility flash-glow {
+  animation: flash-glow 0.8s ease-in-out 4;
+}
+
+@keyframes flash-glow {
+  0%, 100% { box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 80px 10px rgba(96, 165, 250, 0.9), 0 0 120px 20px rgba(59, 130, 246, 0.6); transform: scale(1.03); }
+}
