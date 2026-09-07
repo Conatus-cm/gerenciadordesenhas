@@ -10,8 +10,16 @@ export const verifyAdminLogin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     // Busca credenciais estritamente das variáveis de ambiente no servidor
-    const serverAdminEmail = process.env.ADMIN_EMAIL || "projetointegradorpet@gmail.com";
-    const serverAdminPassword = process.env.ADMIN_PASSWORD || "Projeto2026";
+    const serverAdminEmail = process.env.ADMIN_EMAIL;
+    const serverAdminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!serverAdminEmail || !serverAdminPassword) {
+      console.error("[Admin Auth] ADMIN_EMAIL ou ADMIN_PASSWORD não configurados no ambiente (.env).");
+      return {
+        success: false,
+        message: "Configuração de autenticação não definida no servidor (.env).",
+      };
+    }
 
     const emailNormalized = data.email.trim().toLowerCase();
     const targetEmailNormalized = serverAdminEmail.trim().toLowerCase();
